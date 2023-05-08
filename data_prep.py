@@ -48,5 +48,44 @@ df.to_file('mpas.geojson', driver='GeoJSON')
 # df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
 
 
-# However, for the lines, because beginning and end points are stored separately, a COMPRESSED csv
-# should be fine. 
+######################################
+# Connectivity lines
+
+# TODO
+# eventually wrap this in a for loop to do for all lines
+# Put everything in one large df and then that just gets loaded once
+# See if that runs quick enough, or if I will have to do individual loads as a pld/date is called.
+
+gdb = os.path.join(root, 'spatial_original/lines/COMBINED.gdb')
+lines = gpd.read_file(gdb, layer='conn_avg_pld60')
+lines = lines.drop(['date_start', 'Shape_Length'], axis=1)
+lines = lines[lines.from_id != lines.to_id]  # remove self connections. See notes below.
+lines = lines.explode(index_parts=False)  # now that we removed the arcs, we can change from multilinestring to linestring. It should not create any new features
+lines = lines.to_crs(4326) # project
+
+# get xy of start and end points
+lines['start'] = lines.geometry.apply(lambda g: list(g.coords[0]))
+lines['end'] = lines.geometry.apply(lambda g: list(g.coords[-1]))
+
+lines = pd.DataFrame(lines.drop(columns='geometry'))
+lines.to_json('lines.json.gz')
+
+######################################
+# TO do in the future:
+
+# 0
+# Simplify MPA polygon geometry to see if I can get them load faster
+
+# 1
+# I'm filtering out self connection loops because (1) It complicates the plotting of the other lines
+# that have just 2 points and (2) they aren't super visible with how big I made the arcs anyways.
+# So one thing for the future:
+# Put those values into the MPA polygons that can be viewed on hover.
+
+# 2
+# Persistence points and lines
+
+# 3
+# How will I do the settlement rasters? Bitmap looked like shit.
+# Maybe I'll need to do a whole different kind of map.
+

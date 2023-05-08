@@ -11,6 +11,7 @@ import pandas as pd
 import pydeck as pdk
 import json
 import urllib.request
+import gzip
 
 # for testing:
 root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
@@ -116,7 +117,16 @@ def load_mpas():
     df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
     return df
 
+@st.cache_resource
+def load_connectivity_lines():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
+    with urllib.request.urlopen(path) as data_file:
+        d = gzip.open(data_file, 'rb')
+        df = pd.read_json(d)
+    return df
+
 mpas = load_mpas()
+lines = load_connectivity_lines()
 
 def map():
     fig = pdk.Deck(
@@ -135,6 +145,13 @@ def map():
                 opacity=0.8,
                 stroked=False,
                 filled=True,
+            ),
+            pdk.Layer(
+                'LineLayer',
+                lines,
+                get_source_position='start',
+                get_target_position='end',
+                get_with=2,
             ),
         ],
     )
