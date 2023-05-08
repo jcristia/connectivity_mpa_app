@@ -5,13 +5,16 @@
 
 
 import streamlit as st
-import plotly.graph_objects as go
-import json
-from urllib.request import urlopen
 import pandas as pd
 import geopandas as gpd
 import os
 import pydeck as pdk
+import json
+import urllib.request
+
+# for testing:
+root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
+
 
 st.set_page_config(page_title="MPA Network Connectivity", layout="wide", page_icon="🌊")
 
@@ -86,9 +89,7 @@ st.markdown(f""" <style>
 #############################################################
 
 
-# @st.cache_resource
-# def load_coastline():
-#     #path = 
+
 
 
 st.title('MPA Network Connectivity')
@@ -104,35 +105,32 @@ with st.sidebar.form(key="my_form"):
     """
     )
 
-#st.map(data=None, zoom=None, use_container_width=True)
+@st.cache_resource
+def load_mpas():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
+    with urllib.request.urlopen(path) as data_file:
+        d = json.load(data_file)
+    dfjson = pd.DataFrame.from_dict(d['features'])
+    df = pd.DataFrame()
+    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
+    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
+    return df
 
-root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
-
-# SO this finally works.
-# However, it is very slow to load and pan on a polygon with so many vertices.
-# KEEP THIS CODE for loading MPAs
-# BUT change this to an image (bitmaplayer)
-test = os.path.join(root, 'land.geojson')
-with open(test) as data_file:
-    d = json.load(data_file)
-dfjson = pd.DataFrame.from_dict(d['features'])
-df = pd.DataFrame()
-df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"], axis=1)
-
+mpas = load_mpas()
 
 def map():
     fig = pdk.Deck(
         map_style="mapbox://styles/mapbox/light-v9",
             initial_view_state={
-                "latitude": 37.76,
-                "longitude":-122.4,
+                "latitude": 49.3,
+                "longitude":-123.13,
                 "zoom": 11,
                 'height':700,
             },
         layers=[
             pdk.Layer(
                 'PolygonLayer',
-                df,
+                mpas[['coordinates', 'MPA ID']],
                 get_polygon='coordinates',
                 opacity=0.8,
                 stroked=False,
