@@ -6,8 +6,8 @@
 
 import streamlit as st
 import pandas as pd
-import geopandas as gpd
-import os
+#import geopandas as gpd
+#import os
 import pydeck as pdk
 import json
 import urllib.request
