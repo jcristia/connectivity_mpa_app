@@ -80,7 +80,7 @@ with st.sidebar.form(key="my_form"):
     """
     )
 
-@st.cache_data
+@st.cache_data(persist='disk')
 def filterdata(df, selectbox_pld, selectbox_date):
     return df[(df.pld==selectbox_pld) & (df.date==selectbox_date)]
 
