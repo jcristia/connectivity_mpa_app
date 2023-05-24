@@ -81,8 +81,8 @@ with st.sidebar.form(key="my_form"):
     )
 
 #@st.cache_data(persist='disk')
-def filterdata(lines, selectbox_pld, selectbox_date):
-    return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
+# def filterdata(lines, selectbox_pld, selectbox_date):
+#     return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
 
 # To do:
 # Set zoom and center point
@@ -121,13 +121,15 @@ def map(updated_df):
     return fig
 
 
-if pressed:
-    updated_df = filterdata(lines, selectbox_pld, selectbox_date)
-    st.pydeck_chart(map(updated_df), use_container_width=True)
-else:
-    updated_df = filterdata(lines, 1, 'average')
-    st.pydeck_chart(map(updated_df), use_container_width=True)
+# if pressed:
+#     updated_df = filterdata(lines, selectbox_pld, selectbox_date)
+#     st.pydeck_chart(map(updated_df), use_container_width=True)
+# else:
+#     updated_df = filterdata(lines, 1, 'average')
+#     st.pydeck_chart(map(updated_df), use_container_width=True)
 
+updated_df = lines[(lines.pld==1) & (lines.date=='average')]
+st.pydeck_chart(map(updated_df), use_container_width=True)
 
 #############################################################
 # These were style edits to make the map the full height. It was extermely tedious and this was the
