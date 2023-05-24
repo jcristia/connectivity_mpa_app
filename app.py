@@ -81,8 +81,8 @@ with st.sidebar.form(key="my_form"):
     )
 
 #@st.cache_data(persist='disk')
-def filterdata(df, selectbox_pld, selectbox_date):
-    return df[(df.pld==selectbox_pld) & (df.date==selectbox_date)]
+def filterdata(lines, selectbox_pld, selectbox_date):
+    return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
 
 # To do:
 # Set zoom and center point
