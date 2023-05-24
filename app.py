@@ -2,7 +2,7 @@
 
 # to run from conda
 # python -m streamlit run app.py
-
+# to close: while window still open do ctrl+ScrLk
 
 import streamlit as st
 import pandas as pd
@@ -14,7 +14,7 @@ import urllib.request
 import gzip
 
 # for testing:
-root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
+#root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
 
 
 st.set_page_config(page_title="MPA Network Connectivity", layout="wide", page_icon="🌊")
@@ -35,6 +35,98 @@ st.markdown(f""" <style>
 # To do:
 # remove the footer (see below)
 # add some padding for just the title
+
+
+
+
+st.title('MPA Network Connectivity')
+
+@st.cache_resource
+def load_mpas():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
+    with urllib.request.urlopen(path) as data_file:
+        d = json.load(data_file)
+    dfjson = pd.DataFrame.from_dict(d['features'])
+    df = pd.DataFrame()
+    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
+    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
+    return df
+
+@st.cache_resource
+def load_connectivity_lines():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
+    with urllib.request.urlopen(path) as data_file:
+        d = gzip.open(data_file, 'rb')
+        df = pd.read_json(d)
+    return df
+
+mpas = load_mpas()
+lines = load_connectivity_lines()
+
+# To do:
+# Split out year and month (remove day)
+# Built in threshold value and set as mid range and update filter
+
+with st.sidebar.form(key="my_form"):
+    selectbox_pld = st.selectbox('PLD', [1, 3, 7, 10, 21, 30, 40, 60])
+    selectbox_date = st.selectbox('Release date', ['average', '2011-01-01', '2011-05-01'])
+    pressed = st.form_submit_button("Generate map")
+    expander = st.sidebar.expander("Study description")
+    expander.write(
+        """
+    This app visualizes data from **PAPER TITLE AND LINK**
+    Blah blah blah
+    Blah blah blah
+    """
+    )
+
+@st.cache_data
+def filterdata(df, selectbox_pld, selectbox_date):
+    return df[(df.pld==selectbox_pld) & (df.date==selectbox_date)]
+
+# To do:
+# Set zoom and center point
+# Color and hover of MPAs
+# Color and hover of lines
+# Legend of lines
+
+
+def map(updated_df):
+    fig = pdk.Deck(
+        map_style="mapbox://styles/mapbox/light-v9",
+            initial_view_state={
+                "latitude": 49.3,
+                "longitude":-123.13,
+                "zoom": 11,
+                'height':700,
+            },
+        layers=[
+            pdk.Layer(
+                'PolygonLayer',
+                mpas[['coordinates', 'MPA ID']],
+                get_polygon='coordinates',
+                opacity=0.8,
+                stroked=False,
+                filled=True,
+            ),
+            pdk.Layer(
+                'LineLayer',
+                updated_df,
+                get_source_position='start',
+                get_target_position='end',
+                get_with=2,
+            ),
+        ],
+    )
+    return fig
+
+
+if pressed:
+    updated_df = filterdata(lines, selectbox_pld, selectbox_date)
+    st.pydeck_chart(map(updated_df), use_container_width=True)
+else:
+    updated_df = filterdata(lines, 1, 'average')
+    st.pydeck_chart(map(updated_df), use_container_width=True)
 
 
 #############################################################
@@ -88,73 +180,3 @@ st.markdown(f""" <style>
 #     }}
 #     </style> """, unsafe_allow_html=True)
 #############################################################
-
-
-
-
-
-st.title('MPA Network Connectivity')
-
-
-with st.sidebar.form(key="my_form"):
-    expander = st.sidebar.expander("Study description")
-    expander.write(
-        """
-    This app visualizes data from **PAPER TITLE AND LINK**
-    Blah blah blah
-    Blah blah blah
-    """
-    )
-
-@st.cache_resource
-def load_mpas():
-    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
-    with urllib.request.urlopen(path) as data_file:
-        d = json.load(data_file)
-    dfjson = pd.DataFrame.from_dict(d['features'])
-    df = pd.DataFrame()
-    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
-    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
-    return df
-
-@st.cache_resource
-def load_connectivity_lines():
-    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
-    with urllib.request.urlopen(path) as data_file:
-        d = gzip.open(data_file, 'rb')
-        df = pd.read_json(d)
-    return df
-
-mpas = load_mpas()
-lines = load_connectivity_lines()
-
-def map():
-    fig = pdk.Deck(
-        map_style="mapbox://styles/mapbox/light-v9",
-            initial_view_state={
-                "latitude": 49.3,
-                "longitude":-123.13,
-                "zoom": 11,
-                'height':700,
-            },
-        layers=[
-            pdk.Layer(
-                'PolygonLayer',
-                mpas[['coordinates', 'MPA ID']],
-                get_polygon='coordinates',
-                opacity=0.8,
-                stroked=False,
-                filled=True,
-            ),
-            pdk.Layer(
-                'LineLayer',
-                lines,
-                get_source_position='start',
-                get_target_position='end',
-                get_with=2,
-            ),
-        ],
-    )
-    return fig
-
-st.pydeck_chart(map(), use_container_width=True)

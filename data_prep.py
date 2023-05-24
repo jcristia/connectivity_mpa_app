@@ -51,24 +51,44 @@ df.to_file('mpas.geojson', driver='GeoJSON')
 ######################################
 # Connectivity lines
 
-# TODO
-# eventually wrap this in a for loop to do for all lines
-# Put everything in one large df and then that just gets loaded once
-# See if that runs quick enough, or if I will have to do individual loads as a pld/date is called.
-
+plds = ['1', '3', '7', '10', '21', '30', '40', '60']
+dates = ['avg', '1101', '1105', '1108', '1401', '1405', '1408', '1701', '1705', '1708']
 gdb = os.path.join(root, 'spatial_original/lines/COMBINED.gdb')
-lines = gpd.read_file(gdb, layer='conn_avg_pld60')
-lines = lines.drop(['date_start', 'Shape_Length'], axis=1)
-lines = lines[lines.from_id != lines.to_id]  # remove self connections. See notes below.
-lines = lines.explode(index_parts=False)  # now that we removed the arcs, we can change from multilinestring to linestring. It should not create any new features
-lines = lines.to_crs(4326) # project
 
-# get xy of start and end points
-lines['start'] = lines.geometry.apply(lambda g: list(g.coords[0]))
-lines['end'] = lines.geometry.apply(lambda g: list(g.coords[-1]))
+df_all = pd.DataFrame(columns=['from_id'])
 
-lines = pd.DataFrame(lines.drop(columns='geometry'))
-lines.to_json('lines.json.gz')
+for pld in plds:
+    for date in dates:
+        lines = gpd.read_file(gdb, layer=f'connectivity_{date}_pld{pld}')
+        lines = lines.drop(['Shape_Length'], axis=1)
+        lines = lines[lines.from_id != lines.to_id]  # remove self connections. See notes below.
+        lines = lines.explode(index_parts=False)  # now that we removed the arcs, we can change from multilinestring to linestring. It should not create any new features
+        lines = lines.to_crs(4326) # project
+
+        # get xy of start and end points
+        lines['start'] = lines.geometry.apply(lambda g: list(g.coords[0]))
+        lines['end'] = lines.geometry.apply(lambda g: list(g.coords[-1]))
+
+        lines = pd.DataFrame(lines.drop(columns='geometry'))
+
+        # simplify date
+        lines['date'] = lines.date_start.str[:10]
+
+        # for average ones, date should be "average"
+        if date=='avg':
+            lines['date'] = 'average'
+
+        # drop a bunch of fields for now
+        if date=='avg':
+            lines['prob'] = lines.prob_avg
+            lines = lines.drop(['date_start', 'totalori', 'totquant', 'prob_avg'], axis=1)
+        else:
+            lines['freq'] = 1
+            lines = lines.drop(['quantity', 'totalori', 'time_int', 'date_start'], axis=1)
+
+        df_all = pd.concat([df_all, lines], sort=True, ignore_index=True)
+
+df_all.to_json('lines.json.gz')
 
 ######################################
 # TO do in the future:
@@ -80,7 +100,8 @@ lines.to_json('lines.json.gz')
 # I'm filtering out self connection loops because (1) It complicates the plotting of the other lines
 # that have just 2 points and (2) they aren't super visible with how big I made the arcs anyways.
 # So one thing for the future:
-# Put those values into the MPA polygons that can be viewed on hover.
+# Put those values into the MPA polygons that can be viewed on hover. Hmmm, but I don't want to
+# load these everytime. Maybe once the geometry is simplified.
 
 # 2
 # Persistence points and lines
