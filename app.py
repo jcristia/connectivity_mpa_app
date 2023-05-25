@@ -128,7 +128,7 @@ def map(updated_df):
 #     updated_df = filterdata(lines, 1, 'average')
 #     st.pydeck_chart(map(updated_df), use_container_width=True)
 
-updated_df = lines[lines.to_id==19]
+updated_df = lines
 st.pydeck_chart(map(updated_df), use_container_width=True)
 
 #############################################################
