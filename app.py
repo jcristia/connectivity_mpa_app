@@ -6,8 +6,6 @@
 
 import streamlit as st
 import pandas as pd
-#import geopandas as gpd
-#import os
 import pydeck as pdk
 import json
 import urllib.request
@@ -52,7 +50,7 @@ def load_mpas():
     df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
     return df
 
-@st.cache_resource
+#@st.cache_resource
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
