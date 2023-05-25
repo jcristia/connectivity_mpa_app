@@ -60,7 +60,7 @@ def load_mpas():
 # If not, test it to see how fast it runs without and if this is adequate.
 
 
-#@st.cache_data
+@st.cache_data(persist='disk')
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
