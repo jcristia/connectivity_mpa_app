@@ -50,7 +50,17 @@ def load_mpas():
     df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
     return df
 
-#@st.cache_resource
+
+# TODO:
+# I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
+# when I removed the cache resources.
+# So build it back up again and test it each time:
+# Add back in the filters and the button press. Test.
+# See if I can do cache_data on the filterdata.
+# If not, test it to see how fast it runs without and if this is adequate.
+
+
+#@st.cache_data
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
@@ -79,8 +89,8 @@ with st.sidebar.form(key="my_form"):
     )
 
 #@st.cache_data(persist='disk')
-# def filterdata(lines, selectbox_pld, selectbox_date):
-#     return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
+def filterdata(lines, selectbox_pld, selectbox_date):
+    return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
 
 # To do:
 # Set zoom and center point
@@ -119,16 +129,16 @@ def map(updated_df):
     return fig
 
 
-# if pressed:
-#     updated_df = filterdata(lines, selectbox_pld, selectbox_date)
-#     st.pydeck_chart(map(updated_df), use_container_width=True)
-# else:
-#     updated_df = filterdata(lines, 1, 'average')
-#     st.pydeck_chart(map(updated_df), use_container_width=True)
+if pressed:
+    updated_df = filterdata(lines, selectbox_pld, selectbox_date)
+    st.pydeck_chart(map(updated_df), use_container_width=True)
+else: # to display on start
+    updated_df = filterdata(lines, 1, 'average')
+    st.pydeck_chart(map(updated_df), use_container_width=True)
 
-updated_df = lines
-updated_df = updated_df.query('to_id == 19')
-st.pydeck_chart(map(updated_df), use_container_width=True)
+# updated_df = lines
+# updated_df = updated_df.query('to_id == 19')
+# st.pydeck_chart(map(updated_df), use_container_width=True)
 
 #############################################################
 # These were style edits to make the map the full height. It was extermely tedious and this was the
