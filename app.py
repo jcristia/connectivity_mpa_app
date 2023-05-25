@@ -129,6 +129,7 @@ def map(updated_df):
 #     st.pydeck_chart(map(updated_df), use_container_width=True)
 
 updated_df = lines
+updated_df = updated_df.query('to_id == 19')
 st.pydeck_chart(map(updated_df), use_container_width=True)
 
 #############################################################
