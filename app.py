@@ -51,14 +51,8 @@ def load_mpas():
     return df
 
 
-# TODO:
 # I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
-# when I removed the cache resources.
-# So build it back up again and test it each time:
-# Add back in the filters and the button press. Test.
-# See if I can do cache_data on the filterdata.
-# If not, test it to see how fast it runs without and if this is adequate.
-
+# when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
 
 @st.cache_data(persist='disk')
 def load_connectivity_lines():
