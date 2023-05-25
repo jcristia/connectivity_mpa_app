@@ -11,9 +11,6 @@ import json
 import urllib.request
 import gzip
 
-# for testing:
-#root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
-
 
 st.set_page_config(page_title="MPA Network Connectivity", layout="wide", page_icon="🌊")
 
@@ -27,13 +24,11 @@ st.markdown(f""" <style>
         padding-left: {padding}rem;
         padding-bottom: {padding}rem;
     }}
+    #mpa-network-connectivity {{ /* padding of title */
+        padding-left: 2rem;
+    }}
     footer {{visibility: hidden;}}
     </style> """, unsafe_allow_html=True)
-
-# To do:
-# remove the footer (see below)
-# add some padding for just the title
-
 
 
 
@@ -53,7 +48,6 @@ def load_mpas():
 
 # I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
 # when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
-
 @st.cache_data(persist='disk')
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
@@ -68,6 +62,7 @@ lines = load_connectivity_lines()
 # To do:
 # Split out year and month (remove day)
 # Built in threshold value and set as mid range and update filter
+# Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
 
 with st.sidebar.form(key="my_form"):
     selectbox_pld = st.selectbox('PLD', [1, 3, 7, 10, 21, 30, 40, 60])
@@ -87,19 +82,23 @@ def filterdata(lines, selectbox_pld, selectbox_date):
     return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
 
 # To do:
-# Set zoom and center point
-# Color and hover of MPAs
+# Simplify MPA geometry
+# From all of the connectivity lines, pull the self connections and associate them with the MPA polygons
+# Also at this time, get the actual MPA names. Figure out how to manage multipart ones.
+
 # Color and hover of lines
 # Legend of lines
+
+# Tooltip html
 
 
 def map(updated_df):
     fig = pdk.Deck(
         map_style="mapbox://styles/mapbox/light-v9",
             initial_view_state={
-                "latitude": 49.3,
-                "longitude":-123.13,
-                "zoom": 11,
+                "latitude": 51.6,
+                "longitude":-128.2,
+                "zoom": 5,
                 'height':700,
             },
         layers=[
@@ -107,9 +106,12 @@ def map(updated_df):
                 'PolygonLayer',
                 mpas[['coordinates', 'MPA ID']],
                 get_polygon='coordinates',
-                opacity=0.8,
-                stroked=False,
+                opacity=0.5,
+                stroked=True,
                 filled=True,
+                get_fill_color=[0,92,230],
+                #pickable=True,
+                #auto_highlight=True
             ),
             pdk.Layer(
                 'LineLayer',
@@ -117,8 +119,15 @@ def map(updated_df):
                 get_source_position='start',
                 get_target_position='end',
                 get_with=2,
+                pickable=False,
+                auto_highlight=False
             ),
         ],
+        # Annoyingly, you can only have ONE tooltip structure for all layers. Perhaps I can change
+        # MPAs to include their self-connection values so that the tooltip structure can match.
+        # tooltip={
+        #     "html": "<b>MPA ID:</b> {MPA ID}"
+        # },   # Tooltips seem to really slow down the load time, I think(?)
     )
     return fig
 
@@ -130,9 +139,14 @@ else: # to display on start
     updated_df = filterdata(lines, 1, 'average')
     st.pydeck_chart(map(updated_df), use_container_width=True)
 
-# updated_df = lines
-# updated_df = updated_df.query('to_id == 19')
-# st.pydeck_chart(map(updated_df), use_container_width=True)
+
+
+
+
+
+
+
+
 
 #############################################################
 # These were style edits to make the map the full height. It was extermely tedious and this was the

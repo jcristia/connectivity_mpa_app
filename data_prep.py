@@ -26,6 +26,8 @@ root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
 # Try to convert coastline to image
 # I did it out to bmp, png, tif, and it always looked like shit loading into pydeck. Just abandon this.
 
+# If I want to try again in the future, maybe I could do gridlayer
+
 
 ######################################
 # MPAs
@@ -93,20 +95,11 @@ df_all.to_json('lines.json.gz')
 ######################################
 # TO do in the future:
 
-# 0
-# Simplify MPA polygon geometry to see if I can get them load faster
 
 # 1
-# I'm filtering out self connection loops because (1) It complicates the plotting of the other lines
-# that have just 2 points and (2) they aren't super visible with how big I made the arcs anyways.
-# So one thing for the future:
-# Put those values into the MPA polygons that can be viewed on hover. Hmmm, but I don't want to
-# load these everytime. Maybe once the geometry is simplified.
-
-# 2
 # Persistence points and lines
 
-# 3
+# 2
 # How will I do the settlement rasters? Bitmap looked like shit.
-# Maybe I'll need to do a whole different kind of map.
+# Maybe I'll need to do a whole different kind of map. See GridLayer and H3HexagonLayer
 
