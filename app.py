@@ -48,7 +48,11 @@ def load_mpas():
 
 # I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
 # when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
-@st.cache_data(persist='disk')
+
+# UGH, and now once I added color to lines the caching issue comes up again. It works with the one
+# on filter data, but not on this one, even when I clear the Chrome cache. Perhaps test again after
+# next restart.
+#@st.cache_data(persist='disk')
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
@@ -86,7 +90,6 @@ def filterdata(lines, selectbox_pld, selectbox_date):
 # From all of the connectivity lines, pull the self connections and associate them with the MPA polygons
 # Also at this time, get the actual MPA names. Figure out how to manage multipart ones.
 
-# Color of lines
 # Opacity of lines
 # Layer order of lines? 
 # hover of lines
@@ -123,7 +126,7 @@ def map(updated_df):
                 get_source_position='start',
                 get_target_position='end',
                 getWidth=1,
-                getColor='color',
+                get_color='color',
                 pickable=False,
                 auto_highlight=False
             ),
