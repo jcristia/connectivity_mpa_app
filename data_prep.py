@@ -90,6 +90,39 @@ for pld in plds:
 
         df_all = pd.concat([df_all, lines], sort=True, ignore_index=True)
 
+
+# remove ones that are less than 0.00001
+# My lowest values are 0.000001. These only occur in the averaged dataset and it is a small part of
+# the dataset.
+df_all = df_all[df_all.prob >= 0.00001]
+
+# color scheme
+# It's a bit annoying, but the easiest way to symbolize the lines in the map is to have the color
+# as a field in the dataframe.
+color_scheme = [
+    [13,8,135],
+    [126,3,168],
+    [204,71,121],
+    [249,149,65],
+    [241,250,34]
+]
+
+def get_color(row):
+    prob = row['prob']
+    if prob >= 0.1:
+        color = color_scheme[0]
+    elif prob >= 0.01:
+        color = color_scheme[1]
+    elif prob >= 0.001:
+        color = color_scheme[2]
+    elif prob >= 0.0001:
+        color = color_scheme[3]
+    elif prob >= 0.00001:
+        color = color_scheme[4]
+    return color
+
+df_all['color'] = df_all.apply(get_color, axis=1)
+
 df_all.to_json('lines.json.gz')
 
 ######################################

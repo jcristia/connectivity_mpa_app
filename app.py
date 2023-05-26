@@ -86,8 +86,12 @@ def filterdata(lines, selectbox_pld, selectbox_date):
 # From all of the connectivity lines, pull the self connections and associate them with the MPA polygons
 # Also at this time, get the actual MPA names. Figure out how to manage multipart ones.
 
-# Color and hover of lines
-# Legend of lines
+# Color of lines
+# Opacity of lines
+# Layer order of lines? 
+# hover of lines
+
+# Legend of lines (see link in bookmarks), change labels to percentage
 
 # Tooltip html
 
@@ -118,7 +122,8 @@ def map(updated_df):
                 updated_df,
                 get_source_position='start',
                 get_target_position='end',
-                get_with=2,
+                getWidth=1,
+                getColor='color',
                 pickable=False,
                 auto_highlight=False
             ),
