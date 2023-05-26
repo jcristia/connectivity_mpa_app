@@ -110,8 +110,8 @@ def map(updated_df):
                 stroked=True,
                 filled=True,
                 get_fill_color=[0,92,230],
-                #pickable=True,
-                #auto_highlight=True
+                pickable=True,
+                auto_highlight=True
             ),
             pdk.Layer(
                 'LineLayer',
@@ -125,9 +125,9 @@ def map(updated_df):
         ],
         # Annoyingly, you can only have ONE tooltip structure for all layers. Perhaps I can change
         # MPAs to include their self-connection values so that the tooltip structure can match.
-        # tooltip={
-        #     "html": "<b>MPA ID:</b> {MPA ID}"
-        # },   # Tooltips seem to really slow down the load time, I think(?)
+        tooltip={
+            "html": "<b>MPA ID:</b> {MPA ID}"
+        },   # Tooltips seem to really slow down the load time, I think(?)
     )
     return fig
 
