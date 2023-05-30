@@ -125,6 +125,70 @@ df_all['color'] = df_all.apply(get_color, axis=1)
 
 df_all.to_json('lines.json.gz')
 
+
+######################################
+# Legend html testing
+
+# https://github.com/visgl/deck.gl/issues/4850
+# https://mybinder.org/v2/gh/ajduberstein/interactive-legend-example/master
+# https://discuss.streamlit.io/t/are-you-using-html-in-markdown-tell-us-why/96/65
+
+from ipywidgets import HTML
+
+legend_html = """
+      <style>
+        .line1 {
+        height: 2px;
+        width: 40px;
+        background: rgba(13,8,135);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line2 {
+        height: 2px;
+        width: 40px;
+        background: rgba(126,3,168);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line3 {
+        height: 2px;
+        width: 40px;
+        background: rgba(204,71,121);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line4 {
+        height: 2px;
+        width: 40px;
+        background: rgba(249,149,65);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line5 {
+        height: 2px;
+        width: 40px;
+        background: rgba(241,250,34);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+      </style>
+      <div style="text-align:left; margin-bottom:10px">
+        <h4 style="margin-bottom:-10px">Connection probability</h4>
+        <span class="line1"></span>  &#62;10%<br>
+        <span class="line2"></span>  &#62;1%<br>
+        <span class="line3"></span>  &#62;0.1%<br>
+        <span class="line4"></span>  &#62;0.01%<br>
+        <span class="line5"></span>  &#62;0.001%<br>
+      </div>
+    """
+
+HTML(legend_html)
+
+
+
+
+
 ######################################
 # TO do in the future:
 

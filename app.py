@@ -52,6 +52,10 @@ def load_mpas():
 # UGH, and now once I added color to lines the caching issue comes up again. It works with the one
 # on filter data, but not on this one, even when I clear the Chrome cache. Perhaps test again after
 # next restart.
+
+# TODO: (perhaps wait until everthing else is built) try to cache_data again and try other options
+# for persist. Also look into the streamlit state stuff.
+
 #@st.cache_data(persist='disk')
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
@@ -63,10 +67,62 @@ def load_connectivity_lines():
 mpas = load_mpas()
 lines = load_connectivity_lines()
 
+
+
+legend_html = """
+      <style>
+        .line1 {
+        height: 2px;
+        width: 40px;
+        background: rgba(13,8,135);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line2 {
+        height: 2px;
+        width: 40px;
+        background: rgba(126,3,168);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line3 {
+        height: 2px;
+        width: 40px;
+        background: rgba(204,71,121);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line4 {
+        height: 2px;
+        width: 40px;
+        background: rgba(249,149,65);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+        .line5 {
+        height: 2px;
+        width: 40px;
+        background: rgba(241,250,34);
+        display: inline-block;
+        margin-bottom: 3px;
+        }
+      </style>
+      <div style="text-align:left; margin-bottom:10px">
+        <h4 style="margin-bottom:-10px">Connection probability</h4>
+        <span class="line1"></span>  &#62;10%<br>
+        <span class="line2"></span>  &#62;1%<br>
+        <span class="line3"></span>  &#62;0.1%<br>
+        <span class="line4"></span>  &#62;0.01%<br>
+        <span class="line5"></span>  &#62;0.001%<br>
+      </div>
+    """
+
+
 # To do:
 # Split out year and month (remove day)
 # Built in threshold value and set as mid range and update filter
 # Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
+
 
 with st.sidebar.form(key="my_form"):
     selectbox_pld = st.selectbox('PLD', [1, 3, 7, 10, 21, 30, 40, 60])
@@ -80,23 +136,27 @@ with st.sidebar.form(key="my_form"):
     Blah blah blah
     """
     )
+    st.markdown(legend_html, unsafe_allow_html=True)
 
 @st.cache_data(persist='disk')
 def filterdata(lines, selectbox_pld, selectbox_date):
     return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
 
-# To do:
+
+# TODO:
+
 # Simplify MPA geometry
-# From all of the connectivity lines, pull the self connections and associate them with the MPA polygons
-# Also at this time, get the actual MPA names. Figure out how to manage multipart ones.
-
-# Opacity of lines
-# Layer order of lines? 
-# hover of lines
-
-# Legend of lines (see link in bookmarks), change labels to percentage
+# From all of the connectivity lines, pull the self connections and associate them with the MPA 
+# polygons. Also at this time, get the actual MPA names. Decide how to manage multipart ones.
+# Also at this time - remove any fields I don't need.
 
 # Tooltip html
+
+# Opacity of lines (this can also be defined in the rgba. It is the 'a')
+# Tooltip of lines
+# Auto highlight of lines
+# Perhaps have small arrows along the line?
+
 
 
 def map(updated_df):
@@ -108,6 +168,7 @@ def map(updated_df):
                 "zoom": 5,
                 'height':700,
             },
+        description=legend_html,
         layers=[
             pdk.Layer(
                 'PolygonLayer',
@@ -139,14 +200,12 @@ def map(updated_df):
     )
     return fig
 
-
 if pressed:
     updated_df = filterdata(lines, selectbox_pld, selectbox_date)
     st.pydeck_chart(map(updated_df), use_container_width=True)
 else: # to display on start
     updated_df = filterdata(lines, 1, 'average')
     st.pydeck_chart(map(updated_df), use_container_width=True)
-
 
 
 
