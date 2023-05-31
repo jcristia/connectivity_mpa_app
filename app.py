@@ -30,44 +30,6 @@ st.markdown(f""" <style>
 
 st.title('MPA Network Connectivity')
 
-
-#--------Load MPA polygons----------#
-@st.cache_resource
-def load_mpas():
-    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
-    with urllib.request.urlopen(path) as data_file:
-        d = json.load(data_file)
-    dfjson = pd.DataFrame.from_dict(d['features'])
-    df = pd.DataFrame()
-    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
-    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
-    return df
-
-
-#--------Load connectivity lines----------#
-
-# I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
-# when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
-
-# UGH, and now once I added color to lines the caching issue comes up again. It works with the one
-# on filter data, but not on this one, even when I clear the Chrome cache. Perhaps test again after
-# next restart.
-
-# TODO: (perhaps wait until everthing else is built) try to cache_data again and try other options
-# for persist. Also look into the streamlit state stuff.
-
-#@st.cache_data(persist='disk')
-def load_connectivity_lines():
-    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
-    with urllib.request.urlopen(path) as data_file:
-        d = gzip.open(data_file, 'rb')
-        df = pd.read_json(d)
-    return df
-
-mpas = load_mpas()
-lines = load_connectivity_lines()
-
-
 #--------Create legend----------#
 # (Can't do this in pydeck unfortunately, but given my custom legend, it might just be easier to
 # build it manually)
@@ -121,15 +83,13 @@ legend_html = """
 
 
 # To do:
-# Split out year and month (remove day)
-# Built in threshold value and set as mid range and update filter
 # Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
 
 #--------Sidebar----------#
 with st.sidebar.form(key="my_form"):
-    selectbox_pld = st.selectbox('PLD', [1, 3, 7, 10, 21, 30, 40, 60])
+    selectbox_pld = st.selectbox('PLD (days)', [1, 3, 7, 10, 21, 30, 40, 60])
     selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05'])
-    selectbox_thresh = st.selectbox('Connection strength threshold', [0.001, 0.01, 0.1, 1, 10])
+    selectbox_thresh = st.selectbox('Connection strength threshold %', [0.001, 0.01, 0.1, 1, 10])
     pressed = st.form_submit_button("Generate map")
     expander = st.sidebar.expander("Study description")
     expander.write(
@@ -141,13 +101,47 @@ with st.sidebar.form(key="my_form"):
     )
     st.markdown(legend_html, unsafe_allow_html=True)
 
+#--------Load MPA polygons----------#
+@st.cache_resource
+def load_mpas():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
+    with urllib.request.urlopen(path) as data_file:
+        d = json.load(data_file)
+    dfjson = pd.DataFrame.from_dict(d['features'])
+    df = pd.DataFrame()
+    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
+    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
+    return df
+
+
+#--------Load connectivity lines----------#
+
+# I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
+# when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
+
+# UGH, and now once I added color to lines the caching issue comes up again. It works with the one
+# on filter data, but not on this one, even when I clear the Chrome cache. Perhaps test again after
+# next restart.
+
+# TODO: (perhaps wait until everthing else is built) try to cache_data again and try other options
+# for persist. Also look into the streamlit state stuff.
+
+#@st.cache_data(persist='disk')
+def load_connectivity_lines():
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
+    with urllib.request.urlopen(path) as data_file:
+        d = gzip.open(data_file, 'rb')
+        df = pd.read_json(d)
+    return df
+
+mpas = load_mpas()
+lines = load_connectivity_lines()
+
 
 #--------Filter data----------#
-#@st.cache_data(persist='disk')
+@st.cache_data(persist='disk')
 def filterdata(lines, selectbox_pld, period, thresh):
-    threshold = thresh/100.0
-    df_filter = lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob.ge(threshold))]
-    return df_filter
+    return lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob>=thresh)]
 
 
 # TODO:
@@ -210,10 +204,12 @@ def map(updated_df):
 
 #--------Generate map on load or when button clicked----------#
 if pressed:
-    period = f'{selectbox_date}-01'
-    updated_df = filterdata(lines, selectbox_pld, period, selectbox_thresh)
+    if selectbox_date != 'average':
+        selectbox_date = f'{selectbox_date}-01'
+    updated_df = filterdata(lines, selectbox_pld, selectbox_date, selectbox_thresh/100.0)
     st.pydeck_chart(map(updated_df), use_container_width=True)
 else: # to display on start
-    updated_df = filterdata(lines, 1, 'average', 0.001)
-    st.pydeck_chart(map(updated_df), use_container_width=True)
+    with st.spinner('Initial map load. This may take a few seconds...'):
+        updated_df = filterdata(lines, 1, 'average', 0.00001)
+        st.pydeck_chart(map(updated_df), use_container_width=True)
 
