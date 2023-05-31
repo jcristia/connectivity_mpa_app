@@ -1,8 +1,7 @@
 
 
-# to run from conda
-# python -m streamlit run app.py
-# to close: while window still open do ctrl+ScrLk
+# to run app from conda: python -m streamlit run app.py
+# to close: while tab still open do ctrl+ScrLk
 
 import streamlit as st
 import pandas as pd
@@ -14,8 +13,7 @@ import gzip
 
 st.set_page_config(page_title="MPA Network Connectivity", layout="wide", page_icon="🌊")
 
-
-# remove padding
+# set padding around containers, remove footer
 padding = 0
 st.markdown(f""" <style>
     .appview-container .main .block-container{{
@@ -30,10 +28,10 @@ st.markdown(f""" <style>
     footer {{visibility: hidden;}}
     </style> """, unsafe_allow_html=True)
 
-
-
 st.title('MPA Network Connectivity')
 
+
+#--------Load MPA polygons----------#
 @st.cache_resource
 def load_mpas():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
@@ -45,6 +43,8 @@ def load_mpas():
     df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
     return df
 
+
+#--------Load connectivity lines----------#
 
 # I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
 # when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
@@ -68,7 +68,9 @@ mpas = load_mpas()
 lines = load_connectivity_lines()
 
 
-
+#--------Create legend----------#
+# (Can't do this in pydeck unfortunately, but given my custom legend, it might just be easier to
+# build it manually)
 legend_html = """
       <style>
         .line1 {
@@ -123,10 +125,11 @@ legend_html = """
 # Built in threshold value and set as mid range and update filter
 # Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
 
-
+#--------Sidebar----------#
 with st.sidebar.form(key="my_form"):
     selectbox_pld = st.selectbox('PLD', [1, 3, 7, 10, 21, 30, 40, 60])
-    selectbox_date = st.selectbox('Release date', ['average', '2011-01-01', '2011-05-01'])
+    selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05'])
+    selectbox_thresh = st.selectbox('Connection strength threshold', [0.001, 0.01, 0.1, 1, 10])
     pressed = st.form_submit_button("Generate map")
     expander = st.sidebar.expander("Study description")
     expander.write(
@@ -138,9 +141,13 @@ with st.sidebar.form(key="my_form"):
     )
     st.markdown(legend_html, unsafe_allow_html=True)
 
-@st.cache_data(persist='disk')
-def filterdata(lines, selectbox_pld, selectbox_date):
-    return lines[(lines.pld==selectbox_pld) & (lines.date==selectbox_date)]
+
+#--------Filter data----------#
+#@st.cache_data(persist='disk')
+def filterdata(lines, selectbox_pld, period, thresh):
+    threshold = thresh/100.0
+    df_filter = lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob.ge(threshold))]
+    return df_filter
 
 
 # TODO:
@@ -158,7 +165,7 @@ def filterdata(lines, selectbox_pld, selectbox_date):
 # Perhaps have small arrows along the line?
 
 
-
+#--------Build map----------#
 def map(updated_df):
     fig = pdk.Deck(
         map_style="mapbox://styles/mapbox/light-v9",
@@ -200,69 +207,13 @@ def map(updated_df):
     )
     return fig
 
+
+#--------Generate map on load or when button clicked----------#
 if pressed:
-    updated_df = filterdata(lines, selectbox_pld, selectbox_date)
+    period = f'{selectbox_date}-01'
+    updated_df = filterdata(lines, selectbox_pld, period, selectbox_thresh)
     st.pydeck_chart(map(updated_df), use_container_width=True)
 else: # to display on start
-    updated_df = filterdata(lines, 1, 'average')
+    updated_df = filterdata(lines, 1, 'average', 0.001)
     st.pydeck_chart(map(updated_df), use_container_width=True)
 
-
-
-
-
-
-
-
-
-#############################################################
-# These were style edits to make the map the full height. It was extermely tedious and this was the
-# only way to get it to work.
-# I don't think its worth doing this.
-# With the plotly map I will make I should just see if I can control the height from there.
-# Otherwise you can do it with a pydeck map. You can't say 100% but you can set it in pixels. Doing
-# just 1 line of code is better than all of the below, which may not stay stable overtime.
-
-# remove padding
-# remove bottom container and footer
-# set map height to 100%
-# padding = 0
-# st.markdown(f""" <style>
-#     .appview-container .main .block-container{{
-#         padding-top: {padding}rem;
-#         padding-right: {padding}rem;
-#         padding-left: {padding}rem;
-#         padding-bottom: {padding}rem;
-#     }}
-#     .egzxvld4 {{  /* can't just set it as all descendants. This is a bit tedious but only way I could get it to work. */
-#         height: 100%;
-#     }}
-#     .egzxvld4 > div:first-child {{  /* This div doesn't have a class identifier. This reads as: get all the descendant div, then only the first child */
-#         height: 100%;
-#     }}
-#     .e1tzin5v0 > div:nth-child(3){{
-#         height: 100%;
-#     }}
-#     .e19lei0e0 {{
-#         height: 100%;
-#     }}
-#     .stDeckGlJsonChart{{
-#         height: 100%;
-#     }}
-#     #deckgl-wrapper {{
-#         height: 100% !important;
-#     }}
-#     #view-default-view {{
-#         height: 100% !important;
-#     }}
-#     #view-default-view > div:first-child {{
-#         height: 100% !important;
-#     }}
-#     .css-qcqlej {{
-#         display: none;
-#     }}
-#     .css-164nlkn {{
-#         display: none;
-#     }}
-#     </style> """, unsafe_allow_html=True)
-#############################################################

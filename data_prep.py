@@ -186,7 +186,56 @@ legend_html = """
 HTML(legend_html)
 
 
+#############################################################
+# These were style edits to make the map the full height. It was extermely tedious and this was the
+# only way to get it to work.
+# I don't think its worth doing this.
+# You can't say 100% but you can set it in pixels. Doing just 1 line of code is better than all of 
+# the below, which may not stay stable overtime.
 
+# remove padding
+# remove bottom container and footer
+# set map height to 100%
+# padding = 0
+# st.markdown(f""" <style>
+#     .appview-container .main .block-container{{
+#         padding-top: {padding}rem;
+#         padding-right: {padding}rem;
+#         padding-left: {padding}rem;
+#         padding-bottom: {padding}rem;
+#     }}
+#     .egzxvld4 {{  /* can't just set it as all descendants. This is a bit tedious but only way I could get it to work. */
+#         height: 100%;
+#     }}
+#     .egzxvld4 > div:first-child {{  /* This div doesn't have a class identifier. This reads as: get all the descendant div, then only the first child */
+#         height: 100%;
+#     }}
+#     .e1tzin5v0 > div:nth-child(3){{
+#         height: 100%;
+#     }}
+#     .e19lei0e0 {{
+#         height: 100%;
+#     }}
+#     .stDeckGlJsonChart{{
+#         height: 100%;
+#     }}
+#     #deckgl-wrapper {{
+#         height: 100% !important;
+#     }}
+#     #view-default-view {{
+#         height: 100% !important;
+#     }}
+#     #view-default-view > div:first-child {{
+#         height: 100% !important;
+#     }}
+#     .css-qcqlej {{
+#         display: none;
+#     }}
+#     .css-164nlkn {{
+#         display: none;
+#     }}
+#     </style> """, unsafe_allow_html=True)
+#############################################################
 
 
 ######################################
