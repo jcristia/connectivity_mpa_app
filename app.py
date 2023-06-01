@@ -84,11 +84,12 @@ legend_html = """
 
 # To do:
 # Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
+# Study description
 
 #--------Sidebar----------#
 with st.sidebar.form(key="my_form"):
     selectbox_pld = st.selectbox('PLD (days)', [1, 3, 7, 10, 21, 30, 40, 60])
-    selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05'])
+    selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05', '2011-08', '2014-01', '2014-05', '2014-08', '2017-01', '2017-05', '2017-08'])
     selectbox_thresh = st.selectbox('Connection strength threshold %', [0.001, 0.01, 0.1, 1, 10])
     pressed = st.form_submit_button("Generate map")
     expander = st.sidebar.expander("Study description")
@@ -104,28 +105,27 @@ with st.sidebar.form(key="my_form"):
 #--------Load MPA polygons----------#
 @st.cache_resource
 def load_mpas():
-    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
+    # path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
+    # with urllib.request.urlopen(path) as data_file:
+    #     d = json.load(data_file)
+    # dfjson = pd.DataFrame.from_dict(d['features'])
+    # df = pd.DataFrame()
+    # df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
+    # df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID'], axis=1)
+    # df['MPA name'] = dfjson.apply(lambda row: row['properties']['name'], axis=1)
+    # return df
+
+    path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
-        d = json.load(data_file)
-    dfjson = pd.DataFrame.from_dict(d['features'])
-    df = pd.DataFrame()
-    df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
-    df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID_202011'], axis=1)
+        d = gzip.open(data_file, 'rb')
+        df = pd.read_json(d)
     return df
 
 
 #--------Load connectivity lines----------#
-
-# I couldn't get this to work when deployed. It seemed like a pandas error, but it only worked
-# when I did cache_data instead of cache_resource. I also needed to set persist='disk'.
-
-# UGH, and now once I added color to lines the caching issue comes up again. It works with the one
-# on filter data, but not on this one, even when I clear the Chrome cache. Perhaps test again after
-# next restart.
-
+# Issues with cache_data and pandas filtering on the dataset
 # TODO: (perhaps wait until everthing else is built) try to cache_data again and try other options
 # for persist. Also look into the streamlit state stuff.
-
 #@st.cache_data(persist='disk')
 def load_connectivity_lines():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/lines.json.gz?raw=true'
@@ -144,17 +144,21 @@ def filterdata(lines, selectbox_pld, period, thresh):
     return lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob>=thresh)]
 
 
+
 # TODO:
 
-# Simplify MPA geometry
-# From all of the connectivity lines, pull the self connections and associate them with the MPA 
-# polygons. Also at this time, get the actual MPA names. Decide how to manage multipart ones.
-# Also at this time - remove any fields I don't need.
+# Get MPA names and associate them with the connectivity line to and from IDs (don't need to do it for MPA polygons since these will be in a separate table)
+# Upload and test
+
+# As a separate for loop:
+# From all of the connectivity lines, pull the self connections as their own csv/df. (Make sure to exclude where necessary).
+# Also at this time - remove any fields I don't need. (will still want to and from id and names even though they are the same)
+# In the app script, read in similar to connectivity lines but as its own function.
+# On filterdata function, filter the df, join to MPAs df, return and send to map function.
 
 # Tooltip html
 
 # Opacity of lines (this can also be defined in the rgba. It is the 'a')
-# Tooltip of lines
 # Auto highlight of lines
 # Perhaps have small arrows along the line?
 
@@ -173,7 +177,7 @@ def map(updated_df):
         layers=[
             pdk.Layer(
                 'PolygonLayer',
-                mpas[['coordinates', 'MPA ID']],
+                mpas[['coordinates', 'MPA name']],
                 get_polygon='coordinates',
                 opacity=0.5,
                 stroked=True,
@@ -193,11 +197,10 @@ def map(updated_df):
                 auto_highlight=False
             ),
         ],
-        # Annoyingly, you can only have ONE tooltip structure for all layers. Perhaps I can change
-        # MPAs to include their self-connection values so that the tooltip structure can match.
+        # Annoyingly, you can only have ONE tooltip structure for all layers.
         tooltip={
-            "html": "<b>MPA ID:</b> {MPA ID}"
-        },   # Tooltips seem to really slow down the load time, I think(?)
+            "html": "<b>MPA:</b> {MPA name}"
+        },
     )
     return fig
 
