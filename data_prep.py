@@ -88,6 +88,10 @@ for pld in plds:
 # My lowest values are 0.000001. These only occur in the averaged dataset and it is a small part of
 # the dataset.
 df_all = df_all[df_all.prob >= 0.00001]
+# Change prob values to actual probs
+df_all['prob'] = df_all.prob *100
+# Round to 3 decimal places
+df_all['prob'] = df_all.prob.round(3)
 
 # color scheme
 # It's a bit annoying, but the easiest way to symbolize the lines in the map is to have the color
@@ -102,15 +106,15 @@ color_scheme = [
 
 def get_color(row):
     prob = row['prob']
-    if prob >= 0.1:
+    if prob >= 10:
         color = color_scheme[0]
-    elif prob >= 0.01:
+    elif prob >= 1:
         color = color_scheme[1]
-    elif prob >= 0.001:
+    elif prob >= 0.1:
         color = color_scheme[2]
-    elif prob >= 0.0001:
+    elif prob >= 0.01:
         color = color_scheme[3]
-    elif prob >= 0.00001:
+    elif prob >= 0.001:
         color = color_scheme[4]
     return color
 
@@ -177,6 +181,10 @@ for pld in plds:
 
 # remove ones that are less than 0.00001
 df_all = df_all[df_all.prob >= 0.00001]
+# Change prob values to actual probs
+df_all['prob'] = df_all.prob *100
+# Round to 3 decimal places
+df_all['prob'] = df_all.prob.round(3)
 
 df_all.to_csv('selfconn.csv')
 
@@ -231,6 +239,18 @@ df = selfconns.drop(['Unnamed: 0', 'from_id', 'to_id', 'MPA ID', 'MPA name'], ax
 
 df.to_json('mpas.json.gz')
 
+
+
+######################################
+# Get list of MPA names
+# I'm going to hardcode this list into app.py so that I don't need to generate it there.
+
+mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
+mpa_names = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
+names = list(mpa_names.name.sort_values().unique())
+names.insert(0, 'ALL')
+print(names) # print will put them on one line. If you just send "names" then jupyter puts in line breaks.
+# COPY the text and paste into app.py
 
 
 
