@@ -82,8 +82,12 @@ legend_html = """
     """
 
 
-# To do:
-# Option to select to and from MPA by name (perhaps for multipart ones, it can select all pieces)
+# TODO:
+# Option to select to and from MPA by name. Hard code this in. Produce the text of the list in 
+# data_prep and copy it here (make sure special characters are ok).
+
+# Then down below I will need to add this in to the filter function.
+
 # Study description
 
 #--------Sidebar----------#
@@ -105,16 +109,6 @@ with st.sidebar.form(key="my_form"):
 #--------Load MPA polygons----------#
 @st.cache_resource
 def load_mpas():
-    # path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.geojson?raw=true'  # have to add ?raw=true to the end
-    # with urllib.request.urlopen(path) as data_file:
-    #     d = json.load(data_file)
-    # dfjson = pd.DataFrame.from_dict(d['features'])
-    # df = pd.DataFrame()
-    # df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
-    # df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID'], axis=1)
-    # df['MPA name'] = dfjson.apply(lambda row: row['properties']['name'], axis=1)
-    # return df
-
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
         d = gzip.open(data_file, 'rb')
@@ -140,31 +134,22 @@ lines = load_connectivity_lines()
 
 #--------Filter data----------#
 @st.cache_data(persist='disk')
-def filterdata(lines, selectbox_pld, period, thresh):
-    return lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob>=thresh)]
-
+def filterdata(mpas, lines, selectbox_pld, period, thresh):
+    mpas_filtered = mpas[(mpas.pld==selectbox_pld) & (mpas.date==period)]
+    lines_filtered =  lines[(lines.pld==selectbox_pld) & (lines.date==period) & (lines.prob>=thresh)]
+    return mpas_filtered, lines_filtered
 
 
 # TODO:
 
-# Get MPA names and associate them with the connectivity line to and from IDs (don't need to do it for MPA polygons since these will be in a separate table)
-# Upload and test
-
-# As a separate for loop:
-# From all of the connectivity lines, pull the self connections as their own csv/df. (Make sure to exclude where necessary).
-# Also at this time - remove any fields I don't need. (will still want to and from id and names even though they are the same)
-# In the app script, read in similar to connectivity lines but as its own function.
-# On filterdata function, filter the df, join to MPAs df, return and send to map function.
-
-# Tooltip html
+# Tooltip html to include to/from MPAs and connection strength.
 
 # Opacity of lines (this can also be defined in the rgba. It is the 'a')
 # Auto highlight of lines
-# Perhaps have small arrows along the line?
 
 
 #--------Build map----------#
-def map(updated_df):
+def map(mpas_filter, lines_filter):
     fig = pdk.Deck(
         map_style="mapbox://styles/mapbox/light-v9",
             initial_view_state={
@@ -177,7 +162,7 @@ def map(updated_df):
         layers=[
             pdk.Layer(
                 'PolygonLayer',
-                mpas[['coordinates', 'MPA name']],
+                mpas_filter[['coordinates', 'From MPA']],
                 get_polygon='coordinates',
                 opacity=0.5,
                 stroked=True,
@@ -188,7 +173,7 @@ def map(updated_df):
             ),
             pdk.Layer(
                 'LineLayer',
-                updated_df,
+                lines_filter,
                 get_source_position='start',
                 get_target_position='end',
                 getWidth=1,
@@ -199,7 +184,7 @@ def map(updated_df):
         ],
         # Annoyingly, you can only have ONE tooltip structure for all layers.
         tooltip={
-            "html": "<b>MPA:</b> {MPA name}"
+            "html": "<b>MPA:</b> {From MPA}"
         },
     )
     return fig
@@ -209,10 +194,10 @@ def map(updated_df):
 if pressed:
     if selectbox_date != 'average':
         selectbox_date = f'{selectbox_date}-01'
-    updated_df = filterdata(lines, selectbox_pld, selectbox_date, selectbox_thresh/100.0)
-    st.pydeck_chart(map(updated_df), use_container_width=True)
+    mpas_filter, lines_filter = filterdata(mpas, lines, selectbox_pld, selectbox_date, selectbox_thresh/100.0)
+    st.pydeck_chart(map(mpas_filter, lines_filter), use_container_width=True)
 else: # to display on start
     with st.spinner('Initial map load. This may take a few seconds...'):
-        updated_df = filterdata(lines, 1, 'average', 0.00001)
-        st.pydeck_chart(map(updated_df), use_container_width=True)
+        mpas_filter, lines_filter = filterdata(mpas, lines, 1, 'average', 0.00001)
+        st.pydeck_chart(map(mpas_filter, lines_filter), use_container_width=True)
 

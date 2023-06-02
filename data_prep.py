@@ -8,52 +8,11 @@ import numpy as np
 root = r'C:\Users\cristianij\Documents\Projects\mpa_connectivity_app'
 
 
-
-######################################
-# MPAs
-
-# To get the coordinates in the format that pydeck needs I ended going from shp to gpd to json to
+# To get the coordinates in the format that pydeck needs I ended going from shp/gdb to gpd to json to
 # pd. I tried pickle and parquet and it works locally, but I get errors when loading from a url.
 # I also tried with csv, but it stores the array or coordinates as a big string and it takes a while
-# to convert back in the app.
+# to convert back in the app script.
 
-#mpas = os.path.join(root, 'spatial_original/mpas/mpa_.shp')
-mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
-df = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
-df = df.explode(index_parts=False, ignore_index=True) # Geopandas reads in as multipolygon (doesn't do this with the shapefile). Explode.
-df['geometry'] = df.geometry.simplify(tolerance=50, preserve_topology=True) # remove some vertices to reduce file size
-df = df.to_crs(4326) # project
-
-# read in the table that lists which ones I ended up excluding from the analysis because of ocean model resolution issues
-df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
-df = df.merge(df_ex, on='uID_20201124')
-df = df[df.exclude != 1.0]
-
-# clean up fields
-df = df[['uID_20201124', 'name', 'geometry_x']]
-df = df.rename(columns={'uID_20201124':'uID', 'geometry_x':'geom'})
-
-df = gpd.GeoDataFrame(df, geometry='geom')
-df.to_file('mpas.geojson', driver='GeoJSON')
-
-# OK, this ended up being a bit round about, but I decided to move some of the data munging that was
-# happening in app.py to here.
-
-with open('mpas.geojson') as data_file:
-    d = json.load(data_file)
-dfjson = pd.DataFrame.from_dict(d['features'])
-df = pd.DataFrame()
-df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
-df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID'], axis=1)
-df['MPA name'] = dfjson.apply(lambda row: row['properties']['name'], axis=1)
-
-# Round coordinate values
-# This is just to reduce the file size that needs to be uploaded by the app. Once in the app
-# it will read it into pandas as a float and will probably take the same disk space, but it
-# might help with the initial load.
-df['coordinates'] = df['coordinates'].apply(lambda x: np.round(np.array(x),5))
-
-df.to_json('mpas.json.gz')
 
 
 ######################################
@@ -211,7 +170,7 @@ for pld in plds:
         lines = lines.drop(['uID_20201124'], axis=1)
         lines = lines.merge(mpa_names, left_on='to_id', right_on='uID_20201124')
         lines = lines.rename(columns={'name':'To MPA'})
-        lines = lines.drop(['uID_20201124', 'from_id', 'to_id'], axis=1)
+        lines = lines.drop(['uID_20201124'], axis=1)
 
         df_all = pd.concat([df_all, lines], sort=True, ignore_index=True)
 
@@ -219,7 +178,58 @@ for pld in plds:
 # remove ones that are less than 0.00001
 df_all = df_all[df_all.prob >= 0.00001]
 
-df_all.to_json('selfconn.json.gz')
+df_all.to_csv('selfconn.csv')
+
+
+######################################
+# MPAs
+
+# To get the coordinates in the format that pydeck needs I ended going from shp to gpd to json to
+# pd. I tried pickle and parquet and it works locally, but I get errors when loading from a url.
+# I also tried with csv, but it stores the array or coordinates as a big string and it takes a while
+# to convert back in the app.
+
+#mpas = os.path.join(root, 'spatial_original/mpas/mpa_.shp')
+mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
+df = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
+df = df.explode(index_parts=False, ignore_index=True) # Geopandas reads in as multipolygon (doesn't do this with the shapefile). Explode.
+df['geometry'] = df.geometry.simplify(tolerance=50, preserve_topology=True) # remove some vertices to reduce file size
+df = df.to_crs(4326) # project
+
+# read in the table that lists which ones I ended up excluding from the analysis because of ocean model resolution issues
+df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
+df = df.merge(df_ex, on='uID_20201124')
+df = df[df.exclude != 1.0]
+
+# clean up fields
+df = df[['uID_20201124', 'name', 'geometry_x']]
+df = df.rename(columns={'uID_20201124':'uID', 'geometry_x':'geom'})
+
+df = gpd.GeoDataFrame(df, geometry='geom')
+df.to_file('mpas.geojson', driver='GeoJSON')
+
+# OK, this ended up being a bit round about, but I decided to move some of the data munging that was
+# happening in app.py to here.
+with open('mpas.geojson') as data_file:
+    d = json.load(data_file)
+dfjson = pd.DataFrame.from_dict(d['features'])
+df = pd.DataFrame()
+df["coordinates"] = dfjson.apply(lambda row: row['geometry']["coordinates"][0], axis=1) # This was hard to figure out because the coordinates get double wrapped in list brackets, so you need to go in 1 level.
+df["MPA ID"] = dfjson.apply(lambda row: row['properties']['uID'], axis=1)
+df['MPA name'] = dfjson.apply(lambda row: row['properties']['name'], axis=1)
+
+# Round coordinate values
+# This is just to reduce the file size that needs to be uploaded by the app. Once in the app
+# it will read it into pandas as a float and will probably take the same disk space, but it
+# might help with the initial load.
+df['coordinates'] = df['coordinates'].apply(lambda x: np.round(np.array(x),5))
+
+# Join self connections csv
+selfconns = pd.read_csv('selfconn.csv')
+selfconns = selfconns.merge(df, left_on='from_id', right_on='MPA ID')
+df = selfconns.drop(['Unnamed: 0', 'from_id', 'to_id', 'MPA ID', 'MPA name'], axis=1)
+
+df.to_json('mpas.json.gz')
 
 
 
