@@ -22,7 +22,7 @@ st.markdown(f""" <style>
         padding-left: {padding}rem;
         padding-bottom: {padding}rem;
     }}
-    #mpa-network-connectivity {{ /* padding of title */
+    #nearshore-mpa-network-connectivity {{ /* padding of title */
         padding-left: 2rem;
     }}
     a {{
