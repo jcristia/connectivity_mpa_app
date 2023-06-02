@@ -92,7 +92,7 @@ mpa_names = ['ALL', 'Admiralty Head Marine Preserve', 'Alaska Maritime National 
 with st.sidebar.form(key="my_form"):
     selectbox_pld = st.selectbox('Pelagic larval duration (days)', [1, 3, 7, 10, 21, 30, 40, 60])
     selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05', '2011-08', '2014-01', '2014-05', '2014-08', '2017-01', '2017-05', '2017-08'])
-    selectbox_thresh = st.selectbox('Connection strength threshold %', [0.001, 0.01, 0.1, 1, 10])
+    selectbox_thresh = st.selectbox('Connection strength threshold %', ['ALL (0.001)', 0.01, 0.1, 1, 10])
     selectbox_from = st.selectbox('From MPA', mpa_names)
     selectbox_to = st.selectbox('To MPA', mpa_names)
     pressed = st.form_submit_button("Generate map")
@@ -219,7 +219,11 @@ def map(mpas_filter, lines_filter):
 if pressed:
     if selectbox_date != 'average':
         selectbox_date = f'{selectbox_date}-01'
+    if selectbox_thresh == 'ALL (0.001)':
+        selectbox_thresh = 0.001
     mpas_filter, lines_filter = filterdata(mpas, lines, selectbox_pld, selectbox_date, selectbox_thresh, selectbox_from, selectbox_to)
+    if len(lines_filter)==0 and selectbox_from != selectbox_to:
+        st.warning('There are no connections for that combination of parameter values.')
     st.pydeck_chart(map(mpas_filter, lines_filter), use_container_width=True)
 else: # to display on start
     with st.spinner('Initial map load. This may take a few seconds...'):
