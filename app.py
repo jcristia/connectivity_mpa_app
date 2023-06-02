@@ -31,7 +31,7 @@ st.markdown(f""" <style>
     footer {{visibility: hidden;}}
     </style> """, unsafe_allow_html=True)
 
-st.title('MPA Network Connectivity')
+st.title('Nearshore MPA Network Connectivity')
 st.markdown("<div id=pub style='padding-left: 2rem;'><a href='https://www.biorxiv.org/content/10.1101/2023.05.01.538971v1'>Cristiani et al. 2023</a></div>", unsafe_allow_html=True)
 
 #--------Create legend----------#
