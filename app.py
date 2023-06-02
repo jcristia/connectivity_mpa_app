@@ -88,12 +88,9 @@ legend_html = """
 # Hardcode MPA names so that I don't need to generate them here. Generated in data prep script.
 mpa_names = ['ALL', 'Admiralty Head Marine Preserve', 'Alaska Maritime National Wildlife Refuge', 'Alty Conservancy', 'Anne Vallee (Triangle Island) Ecological Reserve', 'Apodaca Park', 'Argyle Lagoon San Juan Islands Marine Preserve', 'Baeria Rocks Ecological Reserve', 'Banks Nii Luutiksm Conservancy', 'Bella Coola Estuary Conservancy', 'Beresford Island Ecological Reserve', 'Big Bunsby Marine Park', 'Billy Frank Jr. Nisqually National Wildlife Refuge', 'Bishop Bay-Monkey Beach Conservancy', 'Bishop Bay-Monkey Beach Corridor Conservancy', 'Blake Island Underwater Park', 'Bligh Island Marine Park', 'Bodega Ridge Park', 'Boiler Bay Research Reserve', 'Bone River Natural Area Preserve', 'Boundary Bay Wildlife Management Area', 'Broughton Archipelago Park', 'Buccaneer Bay Park', 'Byers/Conroy/Harvey/Sinnett Islands Ecological Reserve', 'Cape Falcon Marine Reserve', 'Cape Falcon Shoreside Marine Protected Area', 'Cape Kiwanda Marine Garden', 'Cape Scott Park', 'Carter Bay Conservancy', 'Cascade Head Marine Reserve', 'Cascade Head North Marine Protected Area', 'Cascade Head South Marine Protected Area', 'Catala Island Marine Park', 'Checleset Bay Ecological Reserve', 'Cherry Point Aquatic Reserve', 'Cluxewe Wildlife Management Area', 'Clyak Estuary Conservancy', 'Codville Lagoon Marine Park', 'Colvos Passage Marine Preserve', 'Copeland Islands Marine Park', 'Cormorant Channel Marine Park', 'Coste Rocks Park', 'Cypress Island Aquatic Reserve', 'Daawuuxusda Conservancy', 'Dabob Bay Natural Area Preserve', 'Dala-Kildala Rivers Estuaries Park', 'Damaxyaa Conservancy', 'Dawley Passage Park', 'Deception Pass Underwater Park', 'Desolation Sound Marine Park', 'Dewdney And Glide Islands Ecological Reserve', 'Dixie Cove Marine Park', 'Drumbeg Park', 'Duke Of Edinburgh (Pine/Storm/Tree Islets) Ecological Reserve', 'Dungeness National Wildlife Refuge', 'Duu Guusd Conservancy', 'Dzawadi/Klinaklini Estuary Conservancy', "Ebey's Landing National Historical Reserve", 'Echo Bay Marine Park', 'Elk River Natural Resources Conservation Area', 'Epper Passage Park', 'Esquimalt Lagoon Migratory Bird Sanctuary', 'False Bay San Juan Islands Marine Preserve', 'Fidalgo Bay Aquatic Reserve', 'Fiordland Conservancy', 'Flores Island Park', 'Foch-Gilttoyees Park', 'Foch-Gilttoyees Protected Area', 'Fort Casey Underwater Park', 'Fort Ward Underwater Park', 'Fort Worden Underwater Park', 'Francis Point Ecolgical Reserve', 'Francis Point Park', 'Friday Harbor San Juan Islands Marine Preserve', 'Gabriola Sands Park', 'Garden Bay Marine Park', 'George C. Reifel Migratory Bird Sanctuary', 'Gitxaala Nii Luutiksm/Kitkatla Conservancy', 'Glacier Bay National Park & Preserve', 'Goat Cove Conservancy', "God's Pocket Marine Park", 'Gowlland Tod Park', 'Grays Harbor National Wildlife Refuge', 'Green Inlet Marine Park', 'Gulf Islands National Park Reserve Of Canada', 'Gwaii Haanas National Marine Conservation Area Reserve & Haida Heritage Site', 'Hakai Conservation Study Area', 'Hakai Luxvbalis Conservancy', 'Halkett Bay Marine Park', 'Harmony Islands Marine Park', 'Hathayim Marine Park [A.K.A. Von Donop Marine Park]', 'Haystack Rock Marine Garden', 'Helliwell Park', 'Hesquiat Peninsula Park', 'Homathko Estuary Park', 'Hudson Rocks Ecological Reserve', 'Jackson Narrows Marine Park', 'Jedediah Island Marine Park', 'Jesse Falls Protected Area', 'Juan De Fuca Park', "K'distsausk/Turtle Point Conservancy", "K'nabiyaaxl/Ashdown Conservancy", "K'uuna Gwaay Conservancy", "K'waal Conservancy", 'Kennedy Creek Natural Area Preserve', 'Kennedy Island Conservancy', 'Keystone Conservation Area', 'Khutzeymateen Inlet Conservancy', 'Kilbella Estuary Conservancy', 'Kimsquit Estuary Conservancy', 'Kitson Island Marine Park', 'Kopachuck Underwater Park', 'Ksgaxl/Stephens Island Conservancy', "Ksi X' Anmaas Conservancy", "Ksi Xts'at'kw/Stagoo Conservancy", 'Ktisgaidz/Macdonald Bay Conservancy', 'Kunxalas Conservancy', 'Kwatna Estuary Conservancy', 'Lanz And Cox Islands Park', 'Larcom Lagoon Conservancy', 'Lawn Point Park', "Lax Ka'gaas/Campania Conservancy", 'Lax Kul Nii Luutiksm/Bonilla Conservancy', 'Lax Kwaxl/Dundas And Melville Islands Conservancy', 'Lax Kwil Dziidz/Fin Conservancy', 'Lucy Islands Conservancy', 'Mahpahkum-Ahkwuna/Deserters-Walker Conservancy', 'Mansons Landing Park', 'Manzanita Cove Conservancy', 'Maquinna Marine Park', 'Maury Island Aquatic Reserve', "Maxtaktsm'aa/Union Passage Conservancy", 'Miracle Beach Park', 'Mitlenatch Island Nature Park', 'Monckton Nii Luutiksm Conservancy', 'Montague Harbour Marine Park', 'Moore/Mckenney/Whitmore Islands Ecological Reserve', 'Muqqiwn/Brooks Peninsula Park', 'Naikoon Park', 'Nang Xaldangaas Conservancy', 'Negiy/Nekite Estuary Conservancy', 'Nestucca Bay National Wildlife Refuge', 'Newcastle Island Marine Park', 'Niawiakum River Natural Area Preserve', 'Nisqually Reach Aquatic Reserve', 'North Bay Natural Area Preserve', 'Nuchatlitz Park', 'Oak Bay Islands Ecological Reserve', 'Octopus Hole Conservation Area', 'Octopus Islands Marine Park', 'Oliver Cove Marine Park', 'Olympic Coast National Marine Sanctuary', 'Olympic National Park', 'Orchard Rocks Conservation Area', 'Otter Rock Marine Garden', 'Otter Rock Marine Reserve', 'Pacific Rim National Park Reserve Of Canada', 'Padilla Bay National Estuarine Research Reserve', 'Palemin/Estero Basin Conservancy', 'Parksville-Qualicum Beach Wildlife Management Area', 'Penrose Island Marine Park', 'Phillips Estuary/?Nacinuxw Conservancy', 'Pirate Cove Research Reserve', 'Pirates Cove Marine Park', 'Plumper Cove Marine Park', 'Porteau Cove Park', 'Protection Island Aquatic Reserve', 'Protection Island National Wildlife Refuge', 'Quatse Estuary Wildlife Management Area', 'Quatsino Park', 'Qwiquallaaq/Boat Bay Conservancy', 'Race Rocks Ecological Reserve', 'Raft Cove Park', 'Rathtrevor Beach Park', 'Rebecca Spit Marine Park', 'Rendezvous Island South Park', 'Roberts Bank Wildlife Management Area', 'Robson Bight (Michael Bigg) Ecological Reserve', 'Rock Bay Marine Park', 'Roscoe Bay Park', 'Rugged Point Marine Park', 'Sabine Channel Marine Park', "Saltar's Point Beach Conservation Area", 'Saltery Bay Park', 'San Juan County/Cypress Island Marine Biological Preserve', 'San Juan Island National Historical Park', 'San Juan Islands National Wildlife Refuge', 'Sandwell Park', 'Santa Gertrudis-Boca Del Infierno Park', 'Sargeant Bay Park', 'Sartine Island Ecological Reserve', 'Shaw Island San Juan Islands Marine Preserve', 'Shearwater Hot Springs Conservancy', 'Shoal Harbour Migratory Bird Sanctuary', 'Siletz Bay National Wildlife Refuge', 'Sitka National Historical Park', 'Skeena Bank Conservancy', "Skwelwil'em Squamish Estuary Wildlife Management Area", 'Small Inlet Marine Park', 'Smelt Bay Park', 'Smith and Minor Island Aquatic Reserve', 'Smuggler Cove Marine Park', 'South Puget Sound Wildlife Area', 'Stair Creek Conservancy', 'Strait Of Georgia And Howe Sound Glass Sponge Reef closure (Dorman Point)', 'Strait Of Georgia And Howe Sound Glass Sponge Reef closure (East Defence Islands)', 'Strait Of Georgia And Howe Sound Glass Sponge Reef closure (Queen Charlotte Channel)', 'Strathcona Park', 'Sturgeon Bank Wildlife Management Area', 'Sue Channel Park', 'Sulphur Passage Park', 'Sund Rock Conservation Area', 'Surge Narrows Park', 'Sydney Inlet Park', 'Tahsish River Ecological Reserve', 'Tahsish-Kwois Park', 'Teakerne Arm Park', 'Ten Mile Point Ecological Reserve', 'Thurston Bay Marine Park', 'Titlow Beach Marine Preserve', 'Tlall Conservancy', 'Tofino Mudflats Wildlife Management Area', 'Tolmie Underwater Park', 'Tongue Point Marine Life Sanctuary', 'Tow Hill Ecological Reserve', 'Tribune Bay Park', "Ugwiwa'/Cape Caution Conservancy", "Ugwiwa'/Cape Caution-Blunden Bay Conservancy", 'Union Passage Marine Park', 'Vargas Island Park', 'Victoria Harbour Migratory Bird Sanctuary', 'Wakeman Estuary Conservancy', 'Wakes Cove Park', 'Waketickeh Creek Conservation Area', 'Wallace Island Marine Park', 'Walsh Cove Park', 'Weewanie Hot Springs Park', 'Whale Cove Habitat Refuge', 'Whaleboat Island Marine Park', 'Willapa National Wildlife Refuge', 'Woodard Bay Natural Resources Conservation Area', 'Xwakwe?Naxde?Ma/Stafford Estuary Conservancy', 'Yaquina Head Marine Garden', 'Yellow and Low Islands San Juan Islands Marine Preserve', "Z's Reef Marine Preserve"]
 
-# TODO:
-# Study description
-
 #--------Sidebar----------#
 with st.sidebar.form(key="my_form"):
-    selectbox_pld = st.selectbox('PLD (days)', [1, 3, 7, 10, 21, 30, 40, 60])
+    selectbox_pld = st.selectbox('Pelagic larval duration (days)', [1, 3, 7, 10, 21, 30, 40, 60])
     selectbox_date = st.selectbox('Release year-month', ['average', '2011-01', '2011-05', '2011-08', '2014-01', '2014-05', '2014-08', '2017-01', '2017-05', '2017-08'])
     selectbox_thresh = st.selectbox('Connection strength threshold %', [0.001, 0.01, 0.1, 1, 10])
     selectbox_from = st.selectbox('From MPA', mpa_names)
@@ -102,9 +99,22 @@ with st.sidebar.form(key="my_form"):
     expander = st.sidebar.expander("Study description")
     expander.write(
         """
-    This app visualizes data from **PAPER TITLE AND LINK**
-    Blah blah blah
-    Blah blah blah
+    This app visualizes data from Cristiani et al. 2023: [Quantifying marine larval dispersal to
+    assess MPA network connectivity and inform furture national and transboundary planning efforts](https://www.biorxiv.org/content/10.1101/2023.05.01.538971v1).
+
+    We modeled the dispersal of multiple nearshore species to estimate the potential connectivity of the existing MPAs in British Columbia, Canada, including connections to MPAs in the United States by simulating dispersal using a biophysical model with regional oceanographic currents.
+    
+    A dispersal simulation was initiated by simultaneously releasing particles from all MPAs. 
+    Particles were released every 4 hours for 2 weeks to capture tidal variation. Simulations were 
+    conducted for three seasons (winter: Jan-Mar, spring freshet: May-Jul, summer/fall:
+    Aug-Oct) over three years (2011, 2014, 2017). There were 2.7 million particles released per time
+    period. Particles were tracked as they were advected by velocity fields in the hydrodynamic 
+    models and diffused at a constant rate. We applied a 15% daily mortality rate. Particles were 
+    tracked for the length of each pelagic larval duration (PLD). At the end of the PLD, any 
+    particles that were over an MPA were assumed to settle and make a successful connection between 
+    the source population and the destination population. We then calculated a directional 
+    probability of connectivity between MPAs by dividing the number of particles that settle on an 
+    MPA by the total amount of particles released from the origin MPA (x 100).
     """
     )
     st.markdown(legend_html, unsafe_allow_html=True)
@@ -150,13 +160,6 @@ def filterdata(mpas, lines, selectbox_pld, period, thresh, selectbox_from, selec
     return mpas_filtered, lines_filtered
 
 
-# TODO:
-
-# Turn on tooltip for lines
-# Opacity of lines (this can also be defined in the rgba. It is the 'a')
-# Auto highlight of lines
-
-
 #--------Build map----------#
 def map(mpas_filter, lines_filter):
     fig = pdk.Deck(
@@ -189,6 +192,16 @@ def map(mpas_filter, lines_filter):
                 get_color='color',
                 pickable=False,
                 auto_highlight=False
+            ),
+            pdk.Layer( # this is a dummy layer that is a thicker width to make hovering easier. Unfortunately, you can't change the picking radius.
+                'LineLayer',
+                lines_filter,
+                get_source_position='start',
+                get_target_position='end',
+                getWidth=4,
+                get_color=[0,0,0,0],
+                pickable=True,
+                auto_highlight=True
             ),
         ],
         # Annoyingly, you can only have ONE tooltip structure for all layers.
