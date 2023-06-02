@@ -77,6 +77,7 @@ legend_html = """
       </style>
       <div style="text-align:left; margin-bottom:10px">
         <h4 style="margin-bottom:-10px">Connection probability</h4>
+        <p style="font-size: 0.75em; margin-bottom:3px"># of larvae settled / # released from origin * 100</p>
         <span class="line1"></span>  &#62;10%<br>
         <span class="line2"></span>  &#62;1%<br>
         <span class="line3"></span>  &#62;0.1%<br>
