@@ -110,7 +110,7 @@ with st.sidebar.form(key="my_form"):
     st.markdown(legend_html, unsafe_allow_html=True)
 
 #--------Load MPA polygons----------#
-@st.cache_resource
+#@st.cache_resource
 def load_mpas():
     path = 'https://github.com/jcristia/connectivity_mpa_app/blob/master/mpas.json.gz?raw=true'
     with urllib.request.urlopen(path) as data_file:
