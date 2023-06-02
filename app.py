@@ -31,8 +31,6 @@ st.markdown(f""" <style>
     footer {{visibility: hidden;}}
     </style> """, unsafe_allow_html=True)
 
-# TODO: remove underline from link
-
 st.title('MPA Network Connectivity')
 st.markdown("<div id=pub style='padding-left: 2rem;'><a href='https://www.biorxiv.org/content/10.1101/2023.05.01.538971v1'>Cristiani et al. 2023</a></div>", unsafe_allow_html=True)
 
@@ -154,8 +152,7 @@ def filterdata(mpas, lines, selectbox_pld, period, thresh, selectbox_from, selec
 
 # TODO:
 
-# Tooltip html to include to/from MPAs and connection strength.
-
+# Turn on tooltip for lines
 # Opacity of lines (this can also be defined in the rgba. It is the 'a')
 # Auto highlight of lines
 
