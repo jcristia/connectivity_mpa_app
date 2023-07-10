@@ -27,7 +27,7 @@ df_all = pd.DataFrame(columns=['pld'])
 # MPAs to exclude
 mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
 df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
-df_ex = df_ex[df_ex.exclude == 1.0]
+df_ex = df_ex[df_ex.exclude.isin([1,2])]
 ex_list = list(df_ex.uID_20201124)
 # MPA names
 mpa_names = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
@@ -136,7 +136,7 @@ df_all = pd.DataFrame(columns=['pld'])
 # MPAs to exclude
 mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
 df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
-df_ex = df_ex[df_ex.exclude == 1.0]
+df_ex = df_ex[df_ex.exclude.isin([1,2])]
 ex_list = list(df_ex.uID_20201124)
 # MPA names
 mpa_names = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
@@ -207,7 +207,7 @@ df = df.to_crs(4326) # project
 # read in the table that lists which ones I ended up excluding from the analysis because of ocean model resolution issues
 df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
 df = df.merge(df_ex, on='uID_20201124')
-df = df[df.exclude != 1.0]
+df = df[df.exclude.isna()]
 
 # clean up fields
 df = df[['uID_20201124', 'name', 'geometry_x']]
@@ -247,6 +247,12 @@ df.to_json('mpas.json.gz')
 
 mpas_gdb = os.path.join(root, 'spatial_original/mpas/mpas.gdb')
 mpa_names = gpd.read_file(mpas_gdb, layer='M09_mpa_joined')
+
+# exclude
+df_ex = gpd.read_file(mpas_gdb, layer='M10_toexcludefromanalysis')
+mpa_names = mpa_names.merge(df_ex, on='uID_20201124')
+mpa_names = mpa_names[mpa_names.exclude.isna()]
+
 names = list(mpa_names.name.sort_values().unique())
 names.insert(0, 'ALL')
 print(names) # print will put them on one line. If you just send "names" then jupyter puts in line breaks.
